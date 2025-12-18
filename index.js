@@ -1,6 +1,13 @@
 const { Telegraf } = require('telegraf');
 const express = require('express');
+const cors = require('cors');
+
 const app = express();
+
+// ✅ ENABLE CORS
+app.use(cors({
+    origin: 'https://refnys.xyz' // your website
+}));
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const bot = new Telegraf(BOT_TOKEN);
@@ -8,7 +15,6 @@ const bot = new Telegraf(BOT_TOKEN);
 const verifiedUsernames = new Set();
 const notifiedUserIds = new Set();
 
-// Telegram bot
 bot.start((ctx) => {
     const username = ctx.from.username;
     const userId = ctx.from.id;
@@ -24,7 +30,6 @@ bot.start((ctx) => {
 
     if (!notifiedUserIds.has(userId)) {
         notifiedUserIds.add(userId);
-
         ctx.reply(
             `✅ Your username has been verified!\n\n` +
             `Your username: @${username}\n\n` +
@@ -33,13 +38,13 @@ bot.start((ctx) => {
     }
 });
 
-// Website check endpoint
+// Website verification endpoint
 app.get('/check/:username', (req, res) => {
     const username = req.params.username.replace('@', '');
     res.json({ valid: verifiedUsernames.has(username) });
 });
 
-// Required for Render
+// Health check
 app.get('/', (req, res) => {
     res.send('Telegram verifier bot running');
 });
